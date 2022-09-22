@@ -3,7 +3,8 @@ FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
-    CONDA_DIR=/opt/conda
+    CONDA_DIR=/opt/conda \
+    PYTHONPATH=/sd/
 
 WORKDIR /sd
 
@@ -20,10 +21,18 @@ RUN wget -O ~/miniconda.sh -q --show-progress --progress=bar:force https://repo.
     rm ~/miniconda.sh
 ENV PATH=$CONDA_DIR/bin:$PATH
 
+COPY . /sd/
+
+# Install the conda environment
+RUN conda env create -f /sd/environment.yaml && echo "source activate ldm" > /root/.bashrc && conda clean --all
+
+# Download the models
+RUN ./download_models.sh
+
 # Install font for prompt matrix
-COPY /data/DejaVuSans.ttf /usr/share/fonts/truetype/
+COPY ./data/DejaVuSans.ttf /usr/share/fonts/truetype/
 
 EXPOSE 7860 8501
 
-COPY ./entrypoint.sh /sd/
-ENTRYPOINT /sd/entrypoint.sh
+ENTRYPOINT conda run -n ldm python /sd/scripts/webui.py
+CMD
