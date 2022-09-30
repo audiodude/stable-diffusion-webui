@@ -28,12 +28,16 @@ COPY ./ui_requirements.txt /install/
 RUN pip install -r /install/ui_requirements.txt
 
 # Install font for prompt matrix
-COPY /data/DejaVuSans.ttf /usr/share/fonts/truetype/
+COPY ./data/DejaVuSans.ttf /usr/share/fonts/truetype/
+
+COPY ./download_models.sh /install
+RUN /install/download_models.sh /sd
+
+COPY . /sd
 
 ENV PYTHONPATH=/sd
 
 EXPOSE 7860 8501
 
-COPY ./entrypoint.sh /sd/
 ENTRYPOINT /sd/entrypoint.sh
 

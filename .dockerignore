@@ -2,3 +2,4 @@ models/
 outputs/
 src/
 gfpgan/
+Dockerfile
